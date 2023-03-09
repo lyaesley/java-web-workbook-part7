@@ -1,6 +1,7 @@
 package com.lyae.workbook.b01.controller;
 
 import com.lyae.workbook.b01.dto.BoardDTO;
+import com.lyae.workbook.b01.dto.BoardListReplyCountDTO;
 import com.lyae.workbook.b01.dto.PageRequestDTO;
 import com.lyae.workbook.b01.dto.PageResponseDTO;
 import com.lyae.workbook.b01.service.BoardService;
@@ -26,7 +27,9 @@ public class BoardController {
 
     @GetMapping("/list")
     public void list(PageRequestDTO pageRequestDTO, Model model){
-        PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+//        PageResponseDTO<BoardDTO> responseDTO = boardService.list(pageRequestDTO);
+
+        PageResponseDTO<BoardListReplyCountDTO> responseDTO = boardService.listWithReplyCount(pageRequestDTO);
 
         log.info(responseDTO);
 
