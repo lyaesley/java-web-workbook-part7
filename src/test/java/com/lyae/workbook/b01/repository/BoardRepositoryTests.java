@@ -10,9 +10,12 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.test.annotation.Commit;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.IntStream;
 
 @SpringBootTest
@@ -21,6 +24,9 @@ public class BoardRepositoryTests {
 
     @Autowired
     private BoardRepository boardRepository;
+
+    @Autowired
+    private ReplyRepository replyRepository;
 
     @Test void testInsert() {
         IntStream.rangeClosed(1,100).forEach(i -> {
@@ -155,5 +161,62 @@ public class BoardRepositoryTests {
         log.info(result.hasPrevious() + ": " + result.hasNext());
 
         result.getContent().forEach(board -> log.info(board));
+    }
+
+    @Test void testInsertWithImages() {
+
+        Board board = Board.builder()
+                .title("Image test")
+                .content("첨부파일 테스트")
+                .writer("tester")
+                .build();
+
+        for (int i = 0; i < 3; i++) {
+
+            board.addImage(UUID.randomUUID().toString(), "file" + i + ".jpg");
+
+        } // end for
+
+        boardRepository.save(board);
+    }
+
+    @Test void testReadWithImages() {
+
+        Optional<Board> result = boardRepository.findByIdWithImages(1L);
+
+        Board board = result.orElseThrow();
+
+        log.info(board);
+        log.info("----------");
+        log.info(board.getImageSet());
+    }
+
+    @Transactional
+    @Commit
+    @Test
+    void testModifyImages() {
+
+        Optional<Board> result = boardRepository.findByIdWithImages(1L);
+
+        Board board = result.orElseThrow();
+
+        //기존의 첨부파일들은 삭제
+        board.clearImages();
+
+        //새로운 첨부파일들
+        for (int i = 0; i < 2; i++) {
+            board.addImage(UUID.randomUUID().toString(), "updatefile" + i + ".jpg");
+        } // end for
+
+        boardRepository.save(board);
+    }
+    @Transactional
+    @Commit
+    @Test void testRemoveAll() {
+        Long bno = 1L;
+
+        replyRepository.deleteByBoard_Bno(bno);
+
+        boardRepository.deleteById(bno);
     }
 }

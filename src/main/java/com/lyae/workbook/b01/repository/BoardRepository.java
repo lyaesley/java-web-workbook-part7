@@ -4,8 +4,11 @@ import com.lyae.workbook.b01.domain.Board;
 import com.lyae.workbook.b01.repository.search.BoardSearch;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+
+import java.util.Optional;
 
 public interface BoardRepository extends JpaRepository<Board, Long>, BoardSearch {
 
@@ -16,4 +19,8 @@ public interface BoardRepository extends JpaRepository<Board, Long>, BoardSearch
 
     @Query(value = "select now() from board where 1=1 limit 1", nativeQuery = true)
     Board getTime();
+
+    @EntityGraph(attributePaths = {"imageSet"})
+    @Query("select b from Board b where b.bno = :bno")
+    Optional<Board> findByIdWithImages(Long bno);
 }
